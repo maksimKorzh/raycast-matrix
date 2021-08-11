@@ -18,19 +18,31 @@ HEIGHT = 95
 FOV = pi / 3
 
 # map
-MAP_SIZE = 8
+MAP_SIZE = 20
 MAP_SCALE = 30
 MAP_RANGE = MAP_SIZE * MAP_SCALE
 MAP_SPEED = (MAP_SCALE / 2) / 10
 MAP = (
-    '########'
-    '#      #'
-    '#      #'
-    '#      #'
-    '#      #'
-    '#      #'
-    '#      #'
-    '########'
+    '####################'
+    '#                  #'
+    '#                  #'
+    '#                  #'
+    '#                  #'
+    '#       #   #      #'
+    '#       #   #      #'
+    '#       #   #      #'
+    '#       #   #      #'
+    '#       #   #      #'
+    '#                  #'
+    '#                  #'
+    '#                  #'
+    '#                  #'
+    '#                  #'
+    '#                  #'
+    '#                  #'
+    '#                  #'
+    '#                  #'
+    '####################'
 )
 
 # player
@@ -115,6 +127,7 @@ while True:
 
         # calculate 3D projection
         depth = vertical_depth if vertical_depth < horizontal_depth else horizontal_depth
+        surface.set_alpha(255 / (1 + depth * depth * 0.0001))
         depth *= cos(player_angle - current_angle)
         wall_height = int(HEIGHT / (depth / MAP_SCALE))
         ceiling = int(HEIGHT / 2) - wall_height
