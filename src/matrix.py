@@ -1,20 +1,17 @@
 # packages
 import pygame
 from math import sin, cos, pi
-import random
+from random import randrange, randint, shuffle
 import sys
 
 # init pygame
 pygame.init()
-window = pygame.display.set_mode((768, 480))
-font = pygame.font.SysFont('Monospace Regular', 12)
-surface = font.render('1', False, (0, 255, 0))
+window = pygame.display.set_mode((1366, 768), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 
 # screen
-WIDTH = 154
-HEIGHT = 95
-#BUFFER_SIZE = WIDTH * HEIGHT
+WIDTH = 136
+HEIGHT = 76
 FOV = pi / 3
 
 # map
@@ -48,13 +45,23 @@ MAP = (
 # player
 player_x = MAP_SCALE + 20
 player_y = MAP_SCALE + 20
-player_angle = pi
+player_angle = pi / 3
+
+# fonts
+chr_size = 10; chr_font = pygame.font.Font('mincho.ttf', chr_size, bold=True)
+fps_size = 16; fps_font = pygame.font.Font('mincho.ttf', fps_size, bold=True)
+sys_size = 10; sys_font = pygame.font.SysFont('Monospace Regular', sys_size, bold=True)
 
 # symbols
-#symbols = 'ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍｦｲｸｺｿﾁﾄﾉﾌﾔﾖﾙﾚﾛﾝ012345789Z:・."=*+-ç ｸﾘ'
-#symbols = '012345789Z'
+katakana = [chr(int('0x30a0', 16) + i) for i in range(96)]
+dark = [chr_font.render(char, False, (0, 255, 0)) for char in katakana]
+light = [chr_font.render(char, False, (0, 255, 0)) for char in katakana]
+background = sys_font.render('0', False, (0, 255, 0))
+shift_index = 0
 
-symbols = 'ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍｦｲｸｺｿﾁﾄﾉﾌﾔﾖﾙﾚﾛﾝ'
+row_offset = [randint(4, 12) for col in range(WIDTH)]
+chunk_length = [randint(5, 25) for col in range(WIDTH)]
+
 # game loop
 while True:
     # escape condition
@@ -87,15 +94,18 @@ while True:
         if MAP[dest_x] in ' e': player_x -= offset_x
         if MAP[dest_y] in ' e': player_y -= offset_y
 
+    # fall down incremental offset
+    shift_index += 1
+
     # raycasting
     window.fill((0, 0, 0))
     current_angle = player_angle - (FOV / 2)
     start_x = int(player_x / MAP_SCALE) * MAP_SCALE
     start_y = int(player_y / MAP_SCALE) * MAP_SCALE
+    
+    # loop over casted rays
     for col in range(WIDTH):
         hit_wall = False
-        
-        
         current_sin = sin(current_angle); current_sin = current_sin if current_sin else 0.000001
         current_cos = cos(current_angle); current_cos = current_cos if current_cos else 0.000001
 
@@ -127,38 +137,44 @@ while True:
 
         # calculate 3D projection
         depth = vertical_depth if vertical_depth < horizontal_depth else horizontal_depth
-        surface.set_alpha(255 / (1 + depth * depth * 0.0001))
+        background.set_alpha(50)
+        #background.set_alpha(int(255 / depth * 100))
+        #dark[0].set_alpha(int(255 / depth * 100))
         depth *= cos(player_angle - current_angle)
         wall_height = int(HEIGHT / (depth / MAP_SCALE))
         ceiling = int(HEIGHT / 2) - wall_height
-        floor = HEIGHT - ceiling
+        floor = HEIGHT - ceiling        
 
+        
         # render scene
         for row in range(HEIGHT):
-            if row <= ceiling:
-                pass
-                #screen[row*WIDTH + col] = ' '#str(random.randint(0, 1))
-            elif row >= floor:
-                pass
-                #screen[row*WIDTH + col] = ' '#str(random.randint(0, 9))
-            elif hit_wall:
-                #screen[row * WIDTH + col] = symbols[int(wall_distance / 5)]
-                #symbols[int(wall_distance / 5)]#symbols[random.randint(0, len(symbols) - 1)]
-                
-                window.blit(surface, (col * 5, row * 5))
+            if row in range(ceiling, floor): window.blit(background, (col * chr_size, row * chr_size))
+
+            if shift_index >= floor:
+                shift_index = 0
+                shuffle(row_offset)
+                shuffle(chunk_length)
+            if row == shift_index:
+                for l in range(chunk_length[col]):
+                    current_row = (row + row_offset[col] + l)
+                    if current_row in range(ceiling, floor):
+                        
+                        window.blit(dark[0], (col * chr_size, current_row * chr_size))
+                    #window.blit(dark[0], (col * 5, (row + row_offset[col] - l - wall_height * 2) * 5))
+
+            # rain bg
+            #else: window.blit(dark[13], (col * 5, row * 5))
+            
+            
                 
         current_angle += (FOV / WIDTH)
     
     # fps
     clock.tick(60)
     fps = str(int(clock.get_fps()))
-    fps_surface = font.render(fps, False, (255, 255, 255))
+    fps_surface = fps_font.render(fps, False, (255, 255, 255))
     window.blit(fps_surface, (0, 0))
     
-    
-    #surface = font.render('おはよ', False, (255, 255, 255))
-    #window.blit(surface, (100, 100))
-    #print(''.join(screen))
     # update display
     pygame.display.flip()
     
