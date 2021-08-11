@@ -58,9 +58,10 @@ dark = [chr_font.render(char, False, (0, 255, 0)) for char in katakana]
 light = [chr_font.render(char, False, (0, 255, 0)) for char in katakana]
 background = sys_font.render('0', False, (0, 255, 0))
 shift_index = 0
+Shift_index_next = 0
 
 row_offset = [randint(4, 12) for col in range(WIDTH)]
-chunk_length = [randint(5, 25) for col in range(WIDTH)]
+chunk_length = [randint(8, 24) for col in range(WIDTH)]
 
 # game loop
 while True:
@@ -93,9 +94,6 @@ while True:
         dest_y = int((player_y - offset_y - distance_thresh_y) / MAP_SCALE) * MAP_SIZE + int(player_x / MAP_SCALE)
         if MAP[dest_x] in ' e': player_x -= offset_x
         if MAP[dest_y] in ' e': player_y -= offset_y
-
-    # fall down incremental offset
-    shift_index += 1
 
     # raycasting
     window.fill((0, 0, 0))
@@ -155,7 +153,7 @@ while True:
                 shuffle(row_offset)
                 shuffle(chunk_length)
             if row == shift_index:
-                for l in range(chunk_length[col]):
+                for l in range(int(chunk_length[col] * wall_height * 0.1)):
                     current_row = (row + row_offset[col] + l)
                     if current_row in range(ceiling, floor):
                         
@@ -168,6 +166,9 @@ while True:
             
                 
         current_angle += (FOV / WIDTH)
+    
+    # fall down incremental offset
+    shift_index += 1
     
     # fps
     clock.tick(60)
