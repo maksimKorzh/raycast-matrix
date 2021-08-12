@@ -19,8 +19,8 @@ MAP_SIZE = 20
 MAP_SCALE = 30
 MAP_RANGE = MAP_SIZE * MAP_SCALE
 MAP_SPEED = (MAP_SCALE / 2) / 10
-MAP = (
-    '########w##w########'
+MAP = list(
+    '#######      #######'
     '#                  #'
     '#                  #'
     '#                  #'
@@ -79,21 +79,28 @@ while True:
     offset_y = cos(player_angle) * MAP_SPEED
     distance_thresh_x = 10 if offset_x > 0 else -10
     distance_thresh_y = 10 if offset_y > 0 else -10
-
+    dest_x = int(player_y / MAP_SCALE) * MAP_SIZE + int((player_x + offset_x + distance_thresh_x) / MAP_SCALE)
+    dest_y = int((player_y + offset_y + distance_thresh_y) / MAP_SCALE) * MAP_SIZE + int(player_x / MAP_SCALE)
+        
     # handle user input
     if keys[pygame.K_ESCAPE]: pygame.quit(); sys.exit(0);
     if keys[pygame.K_LEFT]: player_angle -= 0.03
     if keys[pygame.K_RIGHT]: player_angle += 0.03
     if keys[pygame.K_UP]:
-        dest_x = int(player_y / MAP_SCALE) * MAP_SIZE + int((player_x + offset_x + distance_thresh_x) / MAP_SCALE)
-        dest_y = int((player_y + offset_y + distance_thresh_y) / MAP_SCALE) * MAP_SIZE + int(player_x / MAP_SCALE)
+        
         if MAP[dest_x] in ' e': player_x += offset_x
+        else: MAP[dest_x] = ' '; MAP[dest_x + 1] = '#'
         if MAP[dest_y] in ' e': player_y += offset_y
+        else: MAP[dest_y] = ' '; MAP[dest_y + 1] = '#'
     if keys[pygame.K_DOWN]:
         dest_x = int(player_y / MAP_SCALE) * MAP_SIZE + int((player_x - offset_x - distance_thresh_x) / MAP_SCALE)
         dest_y = int((player_y - offset_y - distance_thresh_y) / MAP_SCALE) * MAP_SIZE + int(player_x / MAP_SCALE)
         if MAP[dest_x] in ' e': player_x -= offset_x
         if MAP[dest_y] in ' e': player_y -= offset_y
+    if keys[pygame.K_SPACE]:
+        MAP[dest_x] = '#'
+    if keys[pygame.K_LCTRL]:
+        MAP[dest_y] = ' '
 
     # raycasting
     window.fill((0, 0, 0))
