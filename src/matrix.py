@@ -57,11 +57,11 @@ katakana = [chr(int('0x30a0', 16) + i) for i in range(96)]
 dark = [chr_font.render(char, False, (0, 255, 0)) for char in katakana]
 light = [chr_font.render(char, False, (0, 255, 0)) for char in katakana]
 background = sys_font.render('0', False, (0, 255, 0))
-shift_index = 0
-Shift_index_next = 0
+shift_index = -HEIGHT * 2
+shift_index_next = -HEIGHT * 4
 
-row_offset = [randint(4, 12) for col in range(WIDTH)]
-chunk_length = [randint(8, 24) for col in range(WIDTH)]
+row_offset = [randint(-HEIGHT, HEIGHT) for col in range(WIDTH)]
+chunk_length = [randint(4, 12) for col in range(WIDTH)]
 
 # game loop
 while True:
@@ -151,18 +151,28 @@ while True:
         ceiling = int(HEIGHT / 2) - wall_height
         floor = HEIGHT - ceiling        
 
+
         
         # render scene
         for row in range(HEIGHT):
-            if row in range(ceiling, floor): window.blit(background if hit_wall=='#' else dark[0], (col * chr_size, row * chr_size))
 
-            
+            if row in range(ceiling, floor):
+                window.blit(background, (col * chr_size, row * chr_size))
+                
+                for l in range(chunk_length[col]):
+                    if row + row_offset[col] + l + shift_index in range(ceiling, floor):
+                        window.blit(dark[0], (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size))
+                    if row + row_offset[col] + l + shift_index_next in range(ceiling, floor):
+                        window.blit(dark[1], (col * chr_size, (row + row_offset[col] + l + shift_index_next) * chr_size))
+
+                if shift_index == 2 * HEIGHT: shift_index = -2 * HEIGHT
+                if shift_index_next == 2 * HEIGHT: shift_index_next = -2 * HEIGHT
             
                 
         current_angle += (FOV / WIDTH)
     
-    # fall down incremental offset
     shift_index += 1
+    shift_index_next += 1
     
     # fps
     clock.tick(60)
