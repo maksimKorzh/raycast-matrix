@@ -10,8 +10,8 @@ window = pygame.display.set_mode((1366, 768), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 
 # screen
-WIDTH = 136
-HEIGHT = 76
+WIDTH = 137
+HEIGHT = 77
 FOV = pi / 3
 
 # map
@@ -20,16 +20,16 @@ MAP_SCALE = 30
 MAP_RANGE = MAP_SIZE * MAP_SCALE
 MAP_SPEED = (MAP_SCALE / 2) / 10
 MAP = (
-    '####################'
+    '########w##w########'
     '#                  #'
     '#                  #'
     '#                  #'
     '#                  #'
     '#       #   #      #'
+    '#       w   #      #'
     '#       #   #      #'
-    '#       #   #      #'
-    '#       #   #      #'
-    '#       #   #      #'
+    '#       w   #      #'
+    '#       w   #      #'
     '#                  #'
     '#                  #'
     '#                  #'
@@ -103,7 +103,7 @@ while True:
     
     # loop over casted rays
     for col in range(WIDTH):
-        hit_wall = False
+        hit_wall = None
         current_sin = sin(current_angle); current_sin = current_sin if current_sin else 0.000001
         current_cos = cos(current_angle); current_cos = current_cos if current_cos else 0.000001
 
@@ -117,7 +117,7 @@ while True:
             if current_sin <= 0: map_x += direction_x
             target_square = map_y * MAP_SIZE + map_x
             if target_square not in range(len(MAP)): break
-            if MAP[target_square] != ' ': hit_wall = True; break
+            if MAP[target_square] != ' ': hit_wall = MAP[target_square]; break
             ray_x += direction_x * MAP_SCALE
 
         # ray hits horizontal line
@@ -130,12 +130,13 @@ while True:
             if current_cos <= 0: map_y += direction_y
             target_square = map_y * MAP_SIZE + map_x
             if target_square not in range(len(MAP)): break
-            if MAP[target_square] != ' ': hit_wall = True; break
+            if MAP[target_square] != ' ': hit_wall = MAP[target_square]; break
             ray_y += direction_y * MAP_SCALE
 
         # calculate 3D projection
         depth = vertical_depth if vertical_depth < horizontal_depth else horizontal_depth
-        background.set_alpha(50)
+        hit_wall = '#' if vertical_depth < horizontal_depth else 'w'
+        background.set_alpha(100)
         #background.set_alpha(int(255 / depth * 100))
         #dark[0].set_alpha(int(255 / depth * 100))
         depth *= cos(player_angle - current_angle)
@@ -146,22 +147,8 @@ while True:
         
         # render scene
         for row in range(HEIGHT):
-            if row in range(ceiling, floor): window.blit(background, (col * chr_size, row * chr_size))
+            if row in range(ceiling, floor): window.blit(background if hit_wall=='#' else dark[0], (col * chr_size, row * chr_size))
 
-            if shift_index >= floor:
-                shift_index = 0
-                shuffle(row_offset)
-                shuffle(chunk_length)
-            if row == shift_index:
-                for l in range(int(chunk_length[col] * wall_height * 0.1)):
-                    current_row = (row + row_offset[col] + l)
-                    if current_row in range(ceiling, floor):
-                        
-                        window.blit(dark[0], (col * chr_size, current_row * chr_size))
-                    #window.blit(dark[0], (col * 5, (row + row_offset[col] - l - wall_height * 2) * 5))
-
-            # rain bg
-            #else: window.blit(dark[13], (col * 5, row * 5))
             
             
                 
