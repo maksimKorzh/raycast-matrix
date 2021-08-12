@@ -10,8 +10,8 @@ window = pygame.display.set_mode((1366, 768), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 
 # screen
-WIDTH = 137
-HEIGHT = 77
+WIDTH = 80
+HEIGHT = 24
 FOV = pi / 3
 
 # map
@@ -48,9 +48,9 @@ player_y = MAP_SCALE + 20
 player_angle = pi / 3
 
 # fonts
-chr_size = 10; chr_font = pygame.font.Font('mincho.ttf', chr_size, bold=True)
+chr_size = 18; chr_font = pygame.font.Font('mincho.ttf', chr_size, bold=True)
 fps_size = 16; fps_font = pygame.font.Font('mincho.ttf', fps_size, bold=True)
-sys_size = 10; sys_font = pygame.font.SysFont('Monospace Regular', sys_size, bold=True)
+sys_size = 18; sys_font = pygame.font.SysFont('Monospace Regular', sys_size, bold=True)
 
 # symbols
 katakana = [chr(int('0x30a0', 16) + i) for i in range(96)]
@@ -89,9 +89,9 @@ while True:
     if keys[pygame.K_UP]:
         
         if MAP[dest_x] in ' e': player_x += offset_x
-        else: MAP[dest_x] = ' '; MAP[dest_x + 1] = '#'
+        #else: MAP[dest_x] = ' '; MAP[dest_x + 1] = '#'
         if MAP[dest_y] in ' e': player_y += offset_y
-        else: MAP[dest_y] = ' '; MAP[dest_y + 1] = '#'
+        #else: MAP[dest_y] = ' '; MAP[dest_y + 1] = '#'
     if keys[pygame.K_DOWN]:
         dest_x = int(player_y / MAP_SCALE) * MAP_SIZE + int((player_x - offset_x - distance_thresh_x) / MAP_SCALE)
         dest_y = int((player_y - offset_y - distance_thresh_y) / MAP_SCALE) * MAP_SIZE + int(player_x / MAP_SCALE)
