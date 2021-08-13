@@ -23,15 +23,15 @@ MAP_SPEED = (MAP_SCALE / 2) / 10 + 3
 MAP = list(
     '############'
     '#          #'
-    '#  #   #   #'
-    '#  #   #   #'
-    '#  ### #   #'
-    '#    # #   #'
-    '#      #   #'
-    '#  #####   #'
-    '#  #       #'
-    '#  #####   #'
+    '#########  #'
+    '#       #  #'
+    '# #  #  #  #'
+    '# #  #  #  #'
+    '# #  ####  #'
     '#          #'
+    '# #  #######'
+    '# #        #'
+    '# #  #     #'
     '############'
 )
 
@@ -50,7 +50,9 @@ dark = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 100, 0)
 if not katakana[char].isdigit() else chr_font.render(katakana[char], False, (0, 100, 0), (0, 0, 0)) for char in range(107)]
 light = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 200, 0), (0, 0, 0)), True, False)
 if not katakana[char].isdigit() else chr_font.render(katakana[char], False, (0, 200, 0), (0, 0, 0)) for char in range(107)]
-highlight = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 255, 140), (0, 0, 0)), True, False)
+highlight_light = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 255, 140), (0, 0, 0)), True, False)
+if not katakana[char].isdigit() else chr_font.render(katakana[char], False, (0, 255,140), (0, 0, 0)) for char in range(107)]
+highlight_dark = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 150, 100), (0, 0, 0)), True, False)
 if not katakana[char].isdigit() else chr_font.render(katakana[char], False, (0, 255,140), (0, 0, 0)) for char in range(107)]
 
 
@@ -144,7 +146,7 @@ while True:
                 for l in range(chunk_length[col]):
                     if row + row_offset[col] + l + shift_index in range(ceiling, floor):
                         if l == chunk_length[col] - 1:
-                            rand_chr = highlight[randint(0, 106)]
+                            rand_chr = highlight_light[randint(0, 106)]
                             rand_chr.set_alpha(shade)
                         else:    
                             rand_chr = light[randint(0, 106)] if color[col] else dark[randint(0, 106)]
@@ -152,7 +154,7 @@ while True:
                         window.blit(rand_chr, (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size))
                     if row + row_offset[col] + l + shift_index_next in range(ceiling, floor):
                         if l == chunk_length[col] - 1:
-                            rand_chr = highlight[randint(0, 106)]
+                            rand_chr = highlight_dark[randint(0, 106)]
                             rand_chr.set_alpha(shade)
                         else:
                             rand_chr = light[randint(0, 106)] if color[col] else dark[randint(0, 106)]
