@@ -121,7 +121,7 @@ while True:
 
         # calculate 3D projection
         depth = vertical_depth if vertical_depth < horizontal_depth else horizontal_depth
-        shade = int(150 / depth * 100)
+        shade = int(150 / depth * 100) if depth > 100 else 150
         depth *= cos(player_angle - step_angle)
         wall_height = int(HEIGHT / (depth / MAP_SCALE))
         ceiling = int(HEIGHT / 2) - wall_height
