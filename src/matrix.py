@@ -6,7 +6,7 @@ import sys
 
 # init pygame
 pygame.init()
-window = pygame.display.set_mode((1366, 768), pygame.FULLSCREEN)
+window = pygame.display.set_mode((1366, 768))#, pygame.FULLSCREEN
 clock = pygame.time.Clock()
 
 # screen
@@ -15,31 +15,19 @@ HEIGHT = 24
 FOV = pi / 3
 
 # map
-MAP_SIZE = 20
+MAP_SIZE = 8
 MAP_SCALE = 30
 MAP_RANGE = MAP_SIZE * MAP_SCALE
-MAP_SPEED = (MAP_SCALE / 2) / 10
+MAP_SPEED = (MAP_SCALE / 2) / 10 + 3
 MAP = list(
-    '#######      #######'
-    '#                  #'
-    '#                  #'
-    '#                  #'
-    '#                  #'
-    '#       #   #      #'
-    '#       w   #      #'
-    '#       #   #      #'
-    '#       w   #      #'
-    '#       w   #      #'
-    '#                  #'
-    '#                  #'
-    '#                  #'
-    '#                  #'
-    '#                  #'
-    '#                  #'
-    '#                  #'
-    '#                  #'
-    '#                  #'
-    '####################'
+    '########'
+    '#      #'
+    '# # #  #'
+    '#      #'
+    '# # #  #'
+    '# # #  #'
+    '#      #'
+    '########'
 )
 
 # player
@@ -48,18 +36,16 @@ player_y = MAP_SCALE + 20
 player_angle = pi / 3
 
 # fonts
-chr_size = 18; chr_font = pygame.font.Font('mincho.ttf', chr_size, bold=True)
-fps_size = 16; fps_font = pygame.font.Font('mincho.ttf', fps_size, bold=True)
-sys_size = 18; sys_font = pygame.font.SysFont('Monospace Regular', sys_size, bold=True)
+chr_size = 18; chr_font = pygame.font.Font('mincho.ttf', chr_size)
+fps_size = 24; fps_font = pygame.font.SysFont('Monospace Regular', fps_size)
 
 # symbols
 katakana = [chr(int('0x30a0', 16) + i) for i in range(96)]
-dark = [chr_font.render(char, False, (0, 255, 0)) for char in katakana]
-light = [chr_font.render(char, False, (0, 255, 0)) for char in katakana]
-background = sys_font.render('0', False, (0, 255, 0))
+dark = [chr_font.render(char, False, (0, 100, 0)) for char in katakana]
+light = [chr_font.render(char, False, (0, 200, 0)) for char in katakana]
+color = [randint(0, 1) for i in katakana]
 shift_index = -HEIGHT * 2
 shift_index_next = -HEIGHT * 4
-
 row_offset = [randint(-HEIGHT, HEIGHT) for col in range(WIDTH)]
 chunk_length = [randint(4, 12) for col in range(WIDTH)]
 
@@ -79,40 +65,33 @@ while True:
     offset_y = cos(player_angle) * MAP_SPEED
     distance_thresh_x = 10 if offset_x > 0 else -10
     distance_thresh_y = 10 if offset_y > 0 else -10
-    dest_x = int(player_y / MAP_SCALE) * MAP_SIZE + int((player_x + offset_x + distance_thresh_x) / MAP_SCALE)
-    dest_y = int((player_y + offset_y + distance_thresh_y) / MAP_SCALE) * MAP_SIZE + int(player_x / MAP_SCALE)
         
     # handle user input
     if keys[pygame.K_ESCAPE]: pygame.quit(); sys.exit(0);
-    if keys[pygame.K_LEFT]: player_angle -= 0.03
-    if keys[pygame.K_RIGHT]: player_angle += 0.03
+    if keys[pygame.K_LEFT]: player_angle -= 0.1
+    if keys[pygame.K_RIGHT]: player_angle += 0.1
     if keys[pygame.K_UP]:
-        
+        dest_x = int(player_y / MAP_SCALE) * MAP_SIZE + int((player_x + offset_x + distance_thresh_x) / MAP_SCALE)
+        dest_y = int((player_y + offset_y + distance_thresh_y) / MAP_SCALE) * MAP_SIZE + int(player_x / MAP_SCALE)
         if MAP[dest_x] in ' e': player_x += offset_x
-        #else: MAP[dest_x] = ' '; MAP[dest_x + 1] = '#'
         if MAP[dest_y] in ' e': player_y += offset_y
-        #else: MAP[dest_y] = ' '; MAP[dest_y + 1] = '#'
     if keys[pygame.K_DOWN]:
         dest_x = int(player_y / MAP_SCALE) * MAP_SIZE + int((player_x - offset_x - distance_thresh_x) / MAP_SCALE)
         dest_y = int((player_y - offset_y - distance_thresh_y) / MAP_SCALE) * MAP_SIZE + int(player_x / MAP_SCALE)
         if MAP[dest_x] in ' e': player_x -= offset_x
         if MAP[dest_y] in ' e': player_y -= offset_y
-    if keys[pygame.K_SPACE]:
-        MAP[dest_x] = '#'
-    if keys[pygame.K_LCTRL]:
-        MAP[dest_y] = ' '
 
     # raycasting
     window.fill((0, 0, 0))
-    current_angle = player_angle - (FOV / 2)
+    step_angle = player_angle - (FOV / 2)
     start_x = int(player_x / MAP_SCALE) * MAP_SCALE
     start_y = int(player_y / MAP_SCALE) * MAP_SCALE
     
     # loop over casted rays
     for col in range(WIDTH):
-        hit_wall = None
-        current_sin = sin(current_angle); current_sin = current_sin if current_sin else 0.000001
-        current_cos = cos(current_angle); current_cos = current_cos if current_cos else 0.000001
+        hit_wall = False
+        current_sin = sin(step_angle); current_sin = current_sin if current_sin else 0.000001
+        current_cos = cos(step_angle); current_cos = current_cos if current_cos else 0.000001
 
         # ray hits vertical line
         ray_x, direction_x = (start_x + MAP_SCALE, 1) if current_sin >= 0 else (start_x, -1)
@@ -124,7 +103,7 @@ while True:
             if current_sin <= 0: map_x += direction_x
             target_square = map_y * MAP_SIZE + map_x
             if target_square not in range(len(MAP)): break
-            if MAP[target_square] != ' ': hit_wall = MAP[target_square]; break
+            if MAP[target_square] != ' ': hit_wall = True; break
             ray_x += direction_x * MAP_SCALE
 
         # ray hits horizontal line
@@ -137,42 +116,42 @@ while True:
             if current_cos <= 0: map_y += direction_y
             target_square = map_y * MAP_SIZE + map_x
             if target_square not in range(len(MAP)): break
-            if MAP[target_square] != ' ': hit_wall = MAP[target_square]; break
+            if MAP[target_square] != ' ': hit_wall = True; break
             ray_y += direction_y * MAP_SCALE
 
         # calculate 3D projection
         depth = vertical_depth if vertical_depth < horizontal_depth else horizontal_depth
-        hit_wall = '#' if vertical_depth < horizontal_depth else 'w'
-        background.set_alpha(100)
-        #background.set_alpha(int(255 / depth * 100))
-        #dark[0].set_alpha(int(255 / depth * 100))
-        depth *= cos(player_angle - current_angle)
+        shade = int(150 / depth * 100)
+        depth *= cos(player_angle - step_angle)
         wall_height = int(HEIGHT / (depth / MAP_SCALE))
         ceiling = int(HEIGHT / 2) - wall_height
-        floor = HEIGHT - ceiling        
-
-
+        floor = HEIGHT - ceiling
         
         # render scene
         for row in range(HEIGHT):
-
             if row in range(ceiling, floor):
-                window.blit(background, (col * chr_size, row * chr_size))
-                
                 for l in range(chunk_length[col]):
                     if row + row_offset[col] + l + shift_index in range(ceiling, floor):
-                        window.blit(dark[0], (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size))
+                        rand_chr = light[randint(0, 95)] if color[col] else dark[randint(0, 95)]
+                        rand_chr.set_alpha(shade)
+                        if l == chunk_length[col] - 1: rand_chr.set_alpha(shade + 70)
+                        pygame.draw.rect(window, (0, 0, 0), (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size, 18, 18) )    
+                        window.blit(rand_chr, (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size))
                     if row + row_offset[col] + l + shift_index_next in range(ceiling, floor):
-                        window.blit(dark[1], (col * chr_size, (row + row_offset[col] + l + shift_index_next) * chr_size))
-
-                if shift_index == 2 * HEIGHT: shift_index = -2 * HEIGHT
-                if shift_index_next == 2 * HEIGHT: shift_index_next = -2 * HEIGHT
-            
-                
-        current_angle += (FOV / WIDTH)
+                        rand_chr = light[randint(0, 95)] if color[col] else dark[randint(0, 95)]
+                        rand_chr.set_alpha(shade)
+                        if l == chunk_length[col] - 1: rand_chr.set_alpha(shade + 70)
+                        pygame.draw.rect(window, (0, 0, 0), (col * chr_size, (row + row_offset[col] + l + shift_index_next) * chr_size, 18, 18))    
+                        window.blit(rand_chr, (col * chr_size, (row + row_offset[col] + l + shift_index_next) * chr_size))
+        
+        # increment angle (next ray)
+        step_angle += (FOV / WIDTH)
     
+    # update 'code rain' shift offsets
     shift_index += 1
     shift_index_next += 1
+    if shift_index == 2 * HEIGHT: shift_index = -2 * HEIGHT
+    if shift_index_next == 2 * HEIGHT: shift_index_next = -2 * HEIGHT
     
     # fps
     clock.tick(60)
