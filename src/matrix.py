@@ -6,7 +6,7 @@ import sys
 
 # init pygame
 pygame.init()
-window = pygame.display.set_mode((1366, 768))#, pygame.FULLSCREEN
+window = pygame.display.set_mode((1366, 768), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 
 # screen
@@ -23,7 +23,7 @@ MAP = list(
     '########'
     '#      #'
     '# # #  #'
-    '#      #'
+    '# # #  #'
     '# # #  #'
     '# # #  #'
     '#      #'
@@ -40,9 +40,16 @@ chr_size = 18; chr_font = pygame.font.Font('mincho.ttf', chr_size)
 fps_size = 24; fps_font = pygame.font.SysFont('Monospace Regular', fps_size)
 
 # symbols
-katakana = [chr(int('0x30a0', 16) + i) for i in range(96)]
-dark = [chr_font.render(char, False, (0, 100, 0)) for char in katakana]
-light = [chr_font.render(char, False, (0, 200, 0)) for char in katakana]
+katakana = [chr(int('0x30a0', 16) + i) for i in range(96)] + list("0123456789Z")
+dark = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 100, 0), (0, 0, 0)), True, False)
+if not katakana[char].isdigit() else chr_font.render(katakana[char], False, (0, 100, 0), (0, 0, 0)) for char in range(107)]
+
+
+
+light = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 200, 0), (0, 0, 0)), True, False)
+if not katakana[char].isdigit() else chr_font.render(katakana[char], False, (0, 200, 0), (0, 0, 0)) for char in range(107)]
+
+
 color = [randint(0, 1) for i in katakana]
 shift_index = -HEIGHT * 2
 shift_index_next = -HEIGHT * 4
@@ -132,16 +139,16 @@ while True:
             if row in range(ceiling, floor):
                 for l in range(chunk_length[col]):
                     if row + row_offset[col] + l + shift_index in range(ceiling, floor):
-                        rand_chr = light[randint(0, 95)] if color[col] else dark[randint(0, 95)]
+                        rand_chr = light[randint(0, 106)] if color[col] else dark[randint(0, 106)]
                         rand_chr.set_alpha(shade)
-                        if l == chunk_length[col] - 1: rand_chr.set_alpha(shade + 70)
-                        pygame.draw.rect(window, (0, 0, 0), (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size, 18, 18) )    
+                        if l == chunk_length[col] - 1: rand_chr.set_alpha(shade + 100)
+                        #pygame.draw.rect(window, (0, 0, 0), (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size, 18, 18) )    
                         window.blit(rand_chr, (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size))
                     if row + row_offset[col] + l + shift_index_next in range(ceiling, floor):
-                        rand_chr = light[randint(0, 95)] if color[col] else dark[randint(0, 95)]
+                        rand_chr = light[randint(0, 106)] if color[col] else dark[randint(0, 106)]
                         rand_chr.set_alpha(shade)
-                        if l == chunk_length[col] - 1: rand_chr.set_alpha(shade + 70)
-                        pygame.draw.rect(window, (0, 0, 0), (col * chr_size, (row + row_offset[col] + l + shift_index_next) * chr_size, 18, 18))    
+                        if l == chunk_length[col] - 1: rand_chr.set_alpha(shade + 100)
+                        #pygame.draw.rect(window, (0, 0, 0), (col * chr_size, (row + row_offset[col] + l + shift_index_next) * chr_size, 18, 18))    
                         window.blit(rand_chr, (col * chr_size, (row + row_offset[col] + l + shift_index_next) * chr_size))
         
         # increment angle (next ray)
@@ -158,7 +165,7 @@ while True:
     fps = str(int(clock.get_fps()))
     fps_surface = fps_font.render(fps, False, (255, 255, 255))
     window.blit(fps_surface, (0, 0))
-    
+
     # update display
     pygame.display.flip()
     
