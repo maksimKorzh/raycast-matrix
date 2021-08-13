@@ -81,8 +81,8 @@ while True:
         
     # handle user input
     if keys[pygame.K_ESCAPE]: pygame.quit(); sys.exit(0);
-    if keys[pygame.K_LEFT]: player_angle -= 0.1
-    if keys[pygame.K_RIGHT]: player_angle += 0.1
+    if keys[pygame.K_LEFT]: player_angle -= 0.03
+    if keys[pygame.K_RIGHT]: player_angle += 0.03
     if keys[pygame.K_UP]:
         dest_x = int(player_y / MAP_SCALE) * MAP_SIZE + int((player_x + offset_x + distance_thresh_x) / MAP_SCALE)
         dest_y = int((player_y + offset_y + distance_thresh_y) / MAP_SCALE) * MAP_SIZE + int(player_x / MAP_SCALE)
@@ -174,7 +174,7 @@ while True:
     clock.tick(60)
     fps = str(int(clock.get_fps()))
     fps_surface = fps_font.render(fps, False, (255, 255, 255))
-    window.blit(fps_surface, (0, 0))
+    #window.blit(fps_surface, (0, 0))
 
     # update display
     pygame.display.flip()
