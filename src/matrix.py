@@ -6,6 +6,7 @@ import sys
 
 # init pygame
 pygame.init()
+pygame.mouse.set_visible(False)
 window = pygame.display.set_mode((1366, 768), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 
@@ -15,19 +16,23 @@ HEIGHT = 24
 FOV = pi / 3
 
 # map
-MAP_SIZE = 8
+MAP_SIZE = 12
 MAP_SCALE = 30
 MAP_RANGE = MAP_SIZE * MAP_SCALE
 MAP_SPEED = (MAP_SCALE / 2) / 10 + 3
 MAP = list(
-    '########'
-    '#      #'
-    '# # #  #'
-    '# # #  #'
-    '# # #  #'
-    '# # #  #'
-    '#      #'
-    '########'
+    '############'
+    '#          #'
+    '#  #   #   #'
+    '#  #   #   #'
+    '#  ### #   #'
+    '#    # #   #'
+    '#      #   #'
+    '#  #####   #'
+    '#  #       #'
+    '#  #####   #'
+    '#          #'
+    '############'
 )
 
 # player
@@ -43,11 +48,10 @@ fps_size = 24; fps_font = pygame.font.SysFont('Monospace Regular', fps_size)
 katakana = [chr(int('0x30a0', 16) + i) for i in range(96)] + list("0123456789Z")
 dark = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 100, 0), (0, 0, 0)), True, False)
 if not katakana[char].isdigit() else chr_font.render(katakana[char], False, (0, 100, 0), (0, 0, 0)) for char in range(107)]
-
-
-
 light = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 200, 0), (0, 0, 0)), True, False)
 if not katakana[char].isdigit() else chr_font.render(katakana[char], False, (0, 200, 0), (0, 0, 0)) for char in range(107)]
+highlight = [pygame.transform.flip(chr_font.render(katakana[char], False, (0, 255, 140), (0, 0, 0)), True, False)
+if not katakana[char].isdigit() else chr_font.render(katakana[char], False, (0, 255,140), (0, 0, 0)) for char in range(107)]
 
 
 color = [randint(0, 1) for i in katakana]
@@ -132,23 +136,27 @@ while True:
         depth *= cos(player_angle - step_angle)
         wall_height = int(HEIGHT / (depth / MAP_SCALE))
         ceiling = int(HEIGHT / 2) - wall_height
-        floor = HEIGHT - ceiling
+        floor = HEIGHT - ceiling + 5
         
         # render scene
         for row in range(HEIGHT):
             if row in range(ceiling, floor):
                 for l in range(chunk_length[col]):
                     if row + row_offset[col] + l + shift_index in range(ceiling, floor):
-                        rand_chr = light[randint(0, 106)] if color[col] else dark[randint(0, 106)]
-                        rand_chr.set_alpha(shade)
-                        if l == chunk_length[col] - 1: rand_chr.set_alpha(shade + 100)
-                        #pygame.draw.rect(window, (0, 0, 0), (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size, 18, 18) )    
+                        if l == chunk_length[col] - 1:
+                            rand_chr = highlight[randint(0, 106)]
+                            rand_chr.set_alpha(shade)
+                        else:    
+                            rand_chr = light[randint(0, 106)] if color[col] else dark[randint(0, 106)]
+                            rand_chr.set_alpha(shade)
                         window.blit(rand_chr, (col * chr_size, (row + row_offset[col] + l + shift_index) * chr_size))
                     if row + row_offset[col] + l + shift_index_next in range(ceiling, floor):
-                        rand_chr = light[randint(0, 106)] if color[col] else dark[randint(0, 106)]
-                        rand_chr.set_alpha(shade)
-                        if l == chunk_length[col] - 1: rand_chr.set_alpha(shade + 100)
-                        #pygame.draw.rect(window, (0, 0, 0), (col * chr_size, (row + row_offset[col] + l + shift_index_next) * chr_size, 18, 18))    
+                        if l == chunk_length[col] - 1:
+                            rand_chr = highlight[randint(0, 106)]
+                            rand_chr.set_alpha(shade)
+                        else:
+                            rand_chr = light[randint(0, 106)] if color[col] else dark[randint(0, 106)]
+                            rand_chr.set_alpha(shade)
                         window.blit(rand_chr, (col * chr_size, (row + row_offset[col] + l + shift_index_next) * chr_size))
         
         # increment angle (next ray)
